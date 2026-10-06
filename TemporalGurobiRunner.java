@@ -7,9 +7,37 @@ import java.util.Random;
 
 public class TemporalGurobiRunner {
 
+    // Instances of Table 1 in the paper (N, P). N = 200, P = 10,000 ran out of memory on 16 GB,
+    // so it only runs with the "table1-oom" mode.
+    static final int[][] TABLE1 = {
+        {10, 50}, {10, 1000}, {10, 10000},
+        {50, 50}, {50, 1000}, {50, 10000},
+        {200, 200}, {200, 1000}
+    };
+    static final int[] TABLE1_OOM = {200, 10000};
+
+    static boolean inTable1(int N, int P, boolean includeOom) {
+        for (int[] c : TABLE1) if (c[0] == N && c[1] == P) return true;
+        return includeOom && N == TABLE1_OOM[0] && P == TABLE1_OOM[1];
+    }
+
+    /**
+     * Usage:
+     *   java TemporalGurobiRunner              full grid      -> resultados_gurobi_sand.csv
+     *   java TemporalGurobiRunner table1       Table 1 only   -> resultados_gurobi_table1.csv
+     *   java TemporalGurobiRunner table1-oom   Table 1 plus N = 200, P = 10,000 (needs a lot of RAM)
+     */
     public static void main(String[] args) {
+        String mode = args.length > 0 ? args[0] : "full";
+        boolean table1 = mode.startsWith("table1");
+        boolean includeOom = mode.equals("table1-oom");
+        if (!mode.equals("full") && !table1) {
+            System.out.println("Unknown mode '" + mode + "'. Use: full, table1 or table1-oom");
+            return;
+        }
+
         System.out.println("=== Bateria Gurobi Temporal (SAND Completo) ===");
-        System.out.println("Config: MIPGap=0.3 | CSV Output");
+        System.out.println("Config: MIPGap=0.01 | mode=" + mode + " | CSV Output");
         System.out.printf("%-4s | %-5s | %-4s | %-17s | %-10s | %-15s\n", "N", "P", "Iter", "Status", "Tempo(s)", "Custo Otimo");
         System.out.println("--------------------------------------------------------------------------------");
 
@@ -22,7 +50,7 @@ public class TemporalGurobiRunner {
         double delta = 50.0; // Boot latency penalty
         double theta = 20.0; // Shutdown logic penalty
 
-        String csvFile = "resultados_gurobi_sand.csv";
+        String csvFile = table1 ? "resultados_gurobi_table1.csv" : "resultados_gurobi_sand.csv";
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(csvFile))) {
             writer.println("N,P,Iteration,Status,Time_s,Optimal_Cost");
@@ -31,6 +59,7 @@ public class TemporalGurobiRunner {
                 for (int P : numPods) {
                     // Evitamos testar cenários inviáveis logicamente (menos pods que nós)
                     if (P < N) continue;
+                    if (table1 && !inTable1(N, P, includeOom)) continue;
 
                     for (int it = 1; it <= numIterations; it++) {
                         Random rand = new Random(42 + N + P + it);

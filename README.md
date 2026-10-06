@@ -64,7 +64,15 @@ javac -cp "$GUROBI_HOME/lib/gurobi.jar" TemporalGurobiRunner.java
 java  -cp ".:$GUROBI_HOME/lib/gurobi.jar" TemporalGurobiRunner
 ```
 
-Grid: N ∈ {10, 20, 50, 100, 200}, P ∈ {50, …, 10000} (skipping P < N), 10 iterations each,
+To run only the instances of Table 1 in the paper (about 40 to 60 minutes with a license),
+pass a mode; results go to `resultados_gurobi_table1.csv`:
+
+```bash
+java -cp ".:$GUROBI_HOME/lib/gurobi.jar" TemporalGurobiRunner table1       # 8 instances
+java -cp ".:$GUROBI_HOME/lib/gurobi.jar" TemporalGurobiRunner table1-oom   # plus N = 200, P = 10,000
+```
+
+Full grid: N ∈ {10, 20, 50, 100, 200}, P ∈ {50, …, 10000} (skipping P < N), 10 iterations each,
 T = 20, δ = 50, θ = 20, MIP gap 1%. Node and pod parameters (U, α, β, γ, u, e) are drawn with the same
 ranges as the static model in Martins et al. (ICUMT 2023).
 
