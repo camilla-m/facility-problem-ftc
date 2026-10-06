@@ -17,6 +17,7 @@ and turning a node on or off has a cost (startup δ, shutdown θ). It compares:
 | File | What it is |
 |---|---|
 | `SandBenchmarkComplete.java` | TGCH vs. reactive baseline benchmark (no dependencies). Writes `benchmark_final_sand_2026.csv`. |
+| `ArrayBenchmark.java` | Same benchmark with node state in primitive arrays. Produces the same costs as `SandBenchmarkComplete` row by row; use it for the decision times reported in the paper. Writes `benchmark_array.csv`. |
 | `TemporalGurobiRunner.java` | Builds and solves the temporal MILP with Gurobi. Writes `resultados_gurobi_sand.csv` and one Gurobi log per run. |
 | `benchmark_final_sand_2026.csv` | Output of the benchmark: 21,000 rows, one per (R, pods, nodes, run, slot). Semicolon separated. |
 | `resultados_gurobi_sand.csv` | Output of the MILP runner: one row per (N, P, iteration). |
@@ -26,7 +27,8 @@ and turning a node on or off has a cost (startup δ, shutdown θ). It compares:
 
 - Java 23 (any recent JDK should work)
 - For the MILP only: Gurobi 11 or later with a valid license. The runner uses the `com.gurobi.gurobi` Java package.
-  Large instances need a lot of memory: with 16 GB of RAM the run at N = 200, P = 10,000 is killed by the OS.
+  The MILP results in the paper were obtained with Gurobi; this repository has the runner but not
+  a license. Large instances need a lot of memory: with 16 GB of RAM the run at N = 200, P = 10,000 is killed by the OS.
 - For the notebook: Python 3 with `pandas`, `matplotlib` and `seaborn`.
 
 ## Running
@@ -37,6 +39,17 @@ and turning a node on or off has a cost (startup δ, shutdown θ). It compares:
 javac SandBenchmarkComplete.java
 java SandBenchmarkComplete
 ```
+
+For the per-slot decision times, run the array-based version instead (about 10 seconds; it runs the
+grid twice to warm up the JIT before measuring):
+
+```bash
+javac ArrayBenchmark.java
+java ArrayBenchmark            # writes benchmark_array.csv
+```
+
+`SandBenchmarkComplete` keeps pods in a `HashMap` and recomputes node usage on every check, so its
+`Time_*` columns are much higher; its costs are identical.
 
 Grid: R ∈ {1, 10, 100}, pods ∈ {50, 100, 200, 500, 1000, 5000, 10000},
 nodes ∈ {10, 20, 50, 100, 200}, 10 runs each, T = 20 slots, seed 42.
