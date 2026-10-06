@@ -19,6 +19,7 @@ and turning a node on or off has a cost (startup δ, shutdown θ). It compares:
 | `SandBenchmarkComplete.java` | TGCH vs. reactive baseline benchmark (no dependencies). Writes `benchmark_final_sand_2026.csv`. |
 | `ArrayBenchmark.java` | Same benchmark with node state in primitive arrays. Produces the same costs as `SandBenchmarkComplete` row by row; use it for the decision times reported in the paper. Writes `benchmark_array.csv`. |
 | `TemporalGurobiRunner.java` | Builds and solves the temporal MILP with Gurobi. Writes `resultados_gurobi_sand.csv` and one Gurobi log per run. |
+| `benchmark_array.csv` | Output of `ArrayBenchmark` measured on an Apple M2 (16 GB): same costs as `benchmark_final_sand_2026.csv`, with the decision times reported in the paper (TGCH mean 0.005 ms per slot, worst case 0.10 ms). |
 | `benchmark_final_sand_2026.csv` | Output of the benchmark: 21,000 rows, one per (R, pods, nodes, run, slot). Semicolon separated. |
 | `resultados_gurobi_sand.csv` | Output of the MILP runner: one row per (N, P, iteration). |
 | `analysedata.ipynb` | Reads the benchmark CSV and draws the cost-savings, cost-over-time and decision-time figures. |
